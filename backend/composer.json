@@ -1,0 +1,19 @@
+{
+    "name": "g9/course-mark-management-backend",
+    "description": "Backend for Course Mark MAnagement Application",
+    "autoload": {
+        "psr-4": {
+            "G9\\CourseMarkManagementBackend\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "khairi143",
+            "email": "148638001+khairi143@users.noreply.github.com"
+        }
+    ],
+    "require": {
+        "slim/slim": "4.*",
+        "vlucas/phpdotenv": "^5.6"
+    }
+}
