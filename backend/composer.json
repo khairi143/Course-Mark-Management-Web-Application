@@ -3,7 +3,7 @@
     "description": "Backend for Course Mark MAnagement Application",
     "autoload": {
         "psr-4": {
-            "G9\\CourseMarkManagementBackend\\": "src/"
+            "App\\": "src/"
         }
     },
     "authors": [
@@ -14,6 +14,8 @@
     ],
     "require": {
         "slim/slim": "4.*",
-        "vlucas/phpdotenv": "^5.6"
+        "vlucas/phpdotenv": "^5.6",
+        "slim/psr7": "^1.7",
+        "firebase/php-jwt": "^6.11"
     }
 }
