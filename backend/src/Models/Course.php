@@ -22,7 +22,7 @@ class Course
     {
         try {
             $stmt = $this->pdo->query("SELECT * FROM courses");
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $stmt->fetchAll();
         } catch (PDOException $e) {
             error_log("Failed to fetch courses: " . $e->getMessage());
             return [];
