@@ -11,11 +11,14 @@
 <<<<<<< HEAD
 <<<<<<< HEAD:frontend/package.json
     "axios": "^1.9.0",
+<<<<<<< HEAD:package.json
     "bootstrap": "^5.3.6",
 =======
 >>>>>>> parent of 0afc283 (Initial commit of Course Mark Management Web Application):package.json
 =======
 >>>>>>> parent of 0afc283 (Initial commit of Course Mark Management Web Application)
+=======
+>>>>>>> parent of 9cc1bbd (controllers routes models update):frontend/package.json
     "core-js": "^3.8.3",
     "vue": "^3.2.13"
   },
