@@ -1,7 +1,7 @@
 <?php
 function getPDO() {
     $host = 'localhost';
-    $db   = 'coursemarkmanagement_db';
+    $db   = 'course_marks_db';
     $user = 'root';
     $pass = '';
     $charset = 'utf8mb4';
