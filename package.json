@@ -8,11 +8,14 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+<<<<<<< HEAD
 <<<<<<< HEAD:frontend/package.json
     "axios": "^1.9.0",
     "bootstrap": "^5.3.6",
 =======
 >>>>>>> parent of 0afc283 (Initial commit of Course Mark Management Web Application):package.json
+=======
+>>>>>>> parent of 0afc283 (Initial commit of Course Mark Management Web Application)
     "core-js": "^3.8.3",
     "vue": "^3.2.13"
   },
