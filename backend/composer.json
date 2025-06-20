@@ -1,0 +1,14 @@
+{
+    "name": "user/bmiapp-api",
+    "authors": [
+        {
+            "name": "rizam",
+            "email": "rizam@utm.my"
+        }
+    ],
+    "require": {
+        "slim/slim": "^4.14",
+        "slim/psr7": "^1.7",
+        "firebase/php-jwt": "^6.11"
+    }
+}
