@@ -21,72 +21,83 @@
     </form>
 
     <script>
-        const loginForm = document.getElementById('loginForm');
-        const messageDiv = document.getElementById('message');
+    const loginForm = document.getElementById('loginForm');
+    const messageDiv = document.getElementById('message');
 
-        function displayMessage(msg, isError = false) {
-            messageDiv.textContent = msg;
-            messageDiv.style.color = isError ? 'red' : 'green';
-        }
+    function displayMessage(msg, isError = false) {
+        messageDiv.textContent = msg;
+        messageDiv.style.color = isError ? 'red' : 'green';
+    }
 
-        loginForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
+    const roleMap = {
+        1: 'lecturer',
+        2: 'student',
+        3: 'advisor',
+        4: 'admin'
+    };
 
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+    loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
 
-            const credentials = {
-                username: username,
-                password: password
-            };
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
 
-            const API_ENDPOINT = 'http://localhost:8080/api/login'; // Your backend login endpoint
+        const credentials = {
+            username: username,
+            password: password
+        };
 
-            try {
-                const response = await fetch(API_ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(credentials)
-                });
+        const API_ENDPOINT = 'http://localhost:8080/api/login';
 
-                if (response.ok) {
-                    const result = await response.json();
-                    const token = result.token;
-                    const user = result.user; // Contains id, username, role
+        try {
+            const response = await fetch(API_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(credentials)
+            });
 
-                    // Store the JWT securely (e.g., in localStorage)
-                    // IMPORTANT: localStorage is convenient but NOT truly secure for sensitive tokens
-                    // For production, consider HttpOnly cookies or more advanced methods.
-                    localStorage.setItem('jwt_token', token);
-                    localStorage.setItem('user_info', JSON.stringify(user));
+            if (response.ok) {
+                const result = await response.json();
+                const token = result.token;
+                const user = result.user;
 
-                    displayMessage(`Login successful! Welcome, ${user.username}. Role: ${user.role}`, false);
-                    console.log('Login Success:', result);
+                // Map role_id to readable role name
+                const roleName = roleMap[user.role_id] || 'unknown';
 
-                    // Redirect to the student dashboard if the role is student
-                    if (user.role === 'student') {
-                        setTimeout(() => {
-                            window.location.href = 'student_dashboard.html';
-                        }, 1000);
+                // Save token and user data
+                localStorage.setItem('jwt_token', token);
+                localStorage.setItem('user_info', JSON.stringify({ ...user, role_name: roleName }));
+
+                displayMessage(`Login successful! Welcome, ${user.username}. Role: ${roleName}`, false);
+                console.log('Login Success:', result);
+
+                // Redirect based on role
+                setTimeout(() => {
+                    if (roleName === 'student') {
+                        window.location.href = '/student_dashboard.html';
+                    } else if (roleName === 'lecturer') {
+                        window.location.href = 'lecturer_dashboard.html';
+                    } else if (roleName === 'advisor') {
+                        window.location.href = 'advisor_dashboard.html';
+                    } else if (roleName === 'admin') {
+                        window.location.href = 'admin_dashboard.html';
                     } else {
-                        // Handle other roles or general dashboard
-                        // setTimeout(() => {
-                        //     window.location.href = 'dashboard.html';
-                        // }, 1000);
+                        window.location.href = 'dashboard.html';
                     }
+                },  80000);
 
-                } else {
-                    const errorResult = await response.json();
-                    displayMessage(`Login failed: ${errorResult.error || 'Unknown error'}`, true);
-                    console.error('Login Error:', errorResult);
-                }
-            } catch (error) {
-                displayMessage('Network error. Could not connect to the server. Check console for details.', true);
-                console.error('Fetch Error:', error);
+            } else {
+                const errorResult = await response.json();
+                displayMessage(`Login failed: ${errorResult.error || 'Unknown error'}`, true);
+                console.error('Login Error:', errorResult);
             }
-        });
-    </script>
+        } catch (error) {
+            displayMessage('Network error. Could not connect to the server. Check console for details.', true);
+            console.error('Fetch Error:', error);
+        }
+    });
+</script>
 </body>
 </html>

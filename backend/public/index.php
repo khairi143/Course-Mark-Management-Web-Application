@@ -30,7 +30,7 @@ $jwtMiddleware = new JwtMiddleware($secretKey, $unprotectedRoutes);
 $app->addRoutingMiddleware();
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
-(require __DIR__ . '/../src/Controllers/LecturerController.php')($app, $jwtMiddleware); // link to controller for lecturer routes
+
 $app->post('/api/register', function (Request $request, Response $response) use ($secretKey) {
     try {
         $registrationData = json_decode($request->getBody()->getContents(), true);
@@ -133,8 +133,8 @@ $app->group('/api', function (RouteCollectorProxy $group) use ($secretKey){
     // Path becomes /api/me/role
     $group->get('/me/role', function (Request $request, Response $response) {
         $jwt = $request->getAttribute('jwt');
-        $role = $jwt->data->role ?? null;
-        $response->getBody()->write(json_encode(['role' => $role]));
+        $role_name= $jwt->data->role ?? null;
+        $response->getBody()->write(json_encode(['role' => $role_name]));
         return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
     });
 

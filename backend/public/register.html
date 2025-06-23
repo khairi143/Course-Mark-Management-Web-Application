@@ -8,7 +8,7 @@
 <body>
     <h1>Register</h1>
 
-    <div id="message" style="color: red; margin-bottom: 10px;"></div> <!-- For displaying messages -->
+    <div id="message" style="color: red; margin-bottom: 10px;"></div>
 
     <form id="registerForm">
         <label for="username">Username:</label><br>
@@ -18,90 +18,90 @@
         <input type="password" id="password" name="password" required><br><br>
 
         <label for="role">Role:</label><br>
-      
-        <input type="text" id="role" name="role" value="student" required placeholder="e.g., student, lecturer"><br><br>
+        <select id="role" name="role" required>
+            <option value="">--Select Role--</option>
+            <option value="student">Student</option>
+            <option value="lecturer">Lecturer</option>
+            <option value="advisor">Advisor</option>
+            <option value="admin">Admin</option>
+        </select><br><br>
 
-   
         <h2>Student Details (if registering as student)</h2>
         <label for="matric_number">Matric No:</label><br>
-        <input type="text" id="matric_number" name="matric_number" required><br><br>
+        <input type="text" id="matric_number" name="matric_number"><br><br>
 
         <label for="name">Student Name:</label><br>
-        <input type="text" id="name" name="name" required><br><br>
+        <input type="text" id="name" name="name"><br><br>
 
         <label for="email">Email:</label><br>
-        <input type="email" id="email" name="email" required><br><br>
+        <input type="email" id="email" name="email"><br><br>
         
         <button type="submit">Register</button>
     </form>
 
     <script>
-        // Get references to the form and message display area
         const registerForm = document.getElementById('registerForm');
         const messageDiv = document.getElementById('message');
 
-        // Function to display messages
         function displayMessage(msg, isError = false) {
             messageDiv.textContent = msg;
             messageDiv.style.color = isError ? 'red' : 'green';
         }
 
-        // Add an event listener for the form submission
         registerForm.addEventListener('submit', async (event) => {
-            event.preventDefault(); // Prevent the default form submission (which reloads the page)
+            event.preventDefault();
 
-            // Get values from the input fields
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const role = document.getElementById('role').value;
             const matric_number = document.getElementById('matric_number').value;
             const name = document.getElementById('name').value;
             const email = document.getElementById('email').value;
-           
 
-            // Construct the data payload for the API
+            // Determine role_id from selected role
+            const roleMap = {
+                student: 2,
+                lecturer: 1,
+                advisor: 3,
+                admin: 4
+            };
+            const role_id = roleMap[role];
+
+            if (!role_id) {
+                displayMessage("Please select a valid role.", true);
+                return;
+            }
+
             const registrationData = {
                 username: username,
                 password: password,
-                role: role,
-                // Include all required student-specific fields
+                role_id: role_id,
                 matric_number: matric_number,
                 name: name,
-                email: email,
+                email: email
             };
 
-            // Define your backend API endpoint URL
-            // IMPORTANT: Adjust this URL if your backend is running on a different domain or port
             const API_ENDPOINT = 'http://localhost:8080/api/register';
 
             try {
-                // Send the POST request to your backend API
                 const response = await fetch(API_ENDPOINT, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json' // Tell the server we are sending JSON
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(registrationData) // Convert JavaScript object to JSON string
+                    body: JSON.stringify(registrationData)
                 });
 
-                // Check if the response was successful (status code 2xx)
                 if (response.ok) {
                     const result = await response.json();
                     displayMessage(`Registration successful! ${result.message || ''} Username: ${result.username}`, false);
                     console.log('Registration Success:', result);
-
-                    // Optional: Redirect to login page after successful registration
-                    // setTimeout(() => {
-                    //     window.location.href = 'login.html';
-                    // }, 2000); // Redirect after 2 seconds
                 } else {
-                    // If the response was an error (e.g., 400, 409, 500)
-                    const errorResult = await response.json(); // Parse the error JSON from backend
+                    const errorResult = await response.json();
                     displayMessage(`Registration failed: ${errorResult.error || 'Unknown error'}`, true);
                     console.error('Registration Error:', errorResult);
                 }
             } catch (error) {
-                // Handle network errors (e.g., server not running, CORS issues)
                 displayMessage('Network error. Could not connect to the server. Check console for details.', true);
                 console.error('Fetch Error:', error);
             }

@@ -7,7 +7,7 @@ namespace App\Services;
 use PDO;
 use PDOException;
 use InvalidArgumentException;
-
+    
 use RuntimeException;
 
 class StudentService

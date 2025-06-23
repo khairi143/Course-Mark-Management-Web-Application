@@ -12,49 +12,46 @@ use InvalidArgumentException;
 use RuntimeException;
 use Firebase\JWT\JWT;
 
-class AuthController{
+class AuthController {
     private string $jwtSecretKey;
 
-    public function __construct(private db $database,private StudentService $studentService, string $jwtSecretKey){
+    public function __construct(private db $database, private StudentService $studentService, string $jwtSecretKey) {
         $this->jwtSecretKey = $jwtSecretKey;
     }
 
     public function register(array $registrationData) {
         $pdo = $this->database->getPDO();
         $pdo->beginTransaction();
-        
+
         try {
             // 1. Core User Creation
             $username = $registrationData['username'];
             $password = $registrationData['password'];
-            $role = $registrationData['role'] ?? 'student'; // Allow client to specify role, or default
+            $role_id = $registrationData['role_id']; // directly use integer
 
-            // Validate role against allowed enum values
-            if (!in_array($role, ['admin', 'lecturer', 'student', 'advisor'])) {
-                 throw new InvalidArgumentException("Invalid role specified.");
+            if (!in_array($role_id, [1, 2, 3, 4])) {
+                throw new InvalidArgumentException("Invalid role_id specified.");
             }
 
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            if ($hashedPassword === false) { throw new \RuntimeException("Failed to hash password."); }
+            if ($hashedPassword === false) {
+                throw new RuntimeException("Failed to hash password.");
+            }
 
-            $userSql = "INSERT INTO users (username, password, role) VALUES (:username, :password, :role)";
+            $userSql = "INSERT INTO users (username, password, role_id) VALUES (:username, :password, :role_id)";
             $userStmt = $pdo->prepare($userSql);
             $userStmt->bindParam(':username', $username);
             $userStmt->bindParam(':password', $hashedPassword);
-            $userStmt->bindParam(':role', $role);
+            $userStmt->bindParam(':role_id', $role_id);
             $userStmt->execute();
 
             $newUserId = (int)$pdo->lastInsertId();
+            $registrationData['user_id'] = $newUserId;
 
             // 2. Role-specific Profile Creation
-            if ($role === 'student') {
+            $profileData = null;
+            if ($role_id === 2) {
                 $profileData = $this->studentService->createStudentProfile($pdo, $username, $registrationData);
-            } elseif ($role === 'lecturer') {
-                // TODO: Implement lecturer profile creation
-                // $profileData = $this->lecturerService->createLecturerProfile($pdo, $username, $registrationData);
-            } elseif ($role === 'advisor') {
-                // TODO: Implement advisor profile creation
-                // $profileData = $this->advisorService->createAdvisorProfile($pdo, $username, $registrationData);
             }
 
             $pdo->commit();
@@ -62,8 +59,8 @@ class AuthController{
             return [
                 'user_id' => $newUserId,
                 'username' => $username,
-                'role' => $role,
-                'profile_data' => $profileData, // Return profile-specific data if available
+                'role_id' => $role_id,
+                'profile_data' => $profileData,
                 'message' => 'User registered successfully.'
             ];
 
@@ -71,11 +68,9 @@ class AuthController{
             $pdo->rollBack();
             throw new RuntimeException("Registration failed: " . $e->getMessage(), 500, $e);
         }
-
     }
 
-    public function login(array $credentials): array
-    {
+    public function login(array $credentials): array {
         if (empty($credentials['username']) || empty($credentials['password'])) {
             throw new InvalidArgumentException("Username and password are required.");
         }
@@ -86,63 +81,49 @@ class AuthController{
         try {
             $pdo = $this->database->getPDO();
 
-            // 1. Find the user by username
-            $sql = "SELECT id, username, password, role FROM users WHERE username = :username";
+            $sql = "SELECT user_id, username, password, role_id FROM users WHERE username = :username";
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':username', $username);
             $stmt->execute();
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // 2. Verify the password
-            /*if (!password_verify($password, $user['password'])) {
-                throw new \RuntimeException("Invalid username or password.", 401); // 401 Unauthorized
-            }*/
-
             if (!$user || !password_verify($password, $user['password'])) {
-                error_log("LOGIN FAILED: Password mismatch");
-                error_log("Entered password: " . $password);
-                error_log("Stored hash: " . $user['password']);
                 throw new RuntimeException("Invalid username or password.", 401);
-              
             }
 
-            // 3. Generate JWT if authentication is successful
             $issuedAt = time();
-            $expirationTime = $issuedAt + 3600; // Token valid for 1 hour (3600 seconds)
+            $expirationTime = $issuedAt + 3600;
 
             $payload = [
-                'iat'  => $issuedAt,             // Issued at: time when the token was generated
-                'exp'  => $expirationTime,       // Expiration time
-                'iss'  => 'your-app-domain.com', // Issuer (e.g., your domain)
-                'data' => [                      // Custom data to include in the token
-                    'id' => $user['id'],
+                'iat' => $issuedAt,
+                'exp' => $expirationTime,
+                'iss' => 'your-app-domain.com',
+                'data' => [
+                    'user_id' => $user['user_id'],
                     'username' => $user['username'],
-                    'role' => $user['role']
+                    'role_id' => $user['role_id']
                 ]
             ];
 
-            // Encode the JWT
             $token = JWT::encode($payload, $this->jwtSecretKey, 'HS256');
 
             return [
                 'token' => $token,
                 'user' => [
-                    'id' => $user['id'],
+                    'user_id' => $user['user_id'],
                     'username' => $user['username'],
-                    'role' => $user['role']
+                    'role_id' => $user['role_id']
                 ]
             ];
 
         } catch (PDOException $e) {
-            throw new \RuntimeException("Database error during login: " . $e->getMessage(), 500, $e);
-        } catch (\RuntimeException $e) {
-            throw $e; // Re-throw authentication failures
+            throw new RuntimeException("Database error during login: " . $e->getMessage(), 500, $e);
+        } catch (RuntimeException $e) {
+            throw $e;
         }
     }
 
-    public function logout(): array
-    {
-      
+    public function logout(): array {
         return ['message' => 'Logged out successfully.'];
     }
 }
