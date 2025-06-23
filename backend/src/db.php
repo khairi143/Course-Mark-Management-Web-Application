@@ -1,4 +1,4 @@
-<?php
+<?php 
 function getPDO() {
     $host = 'localhost';
     $db   = 'course_marks_db';
@@ -15,5 +15,23 @@ function getPDO() {
         ]);
     } catch (PDOException $e) {
         die('DB Connection failed: ' . $e->getMessage());
+    }
+    
+} 
+
+namespace App;
+
+use PDO;
+use PDOException;
+
+class db {
+    public function connect() {
+        try {
+            $pdo = new PDO("mysql:host=localhost;dbname=your_database", "root", "");
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            return $pdo;
+        } catch (PDOException $e) {
+            die("DB Connection failed: " . $e->getMessage());
+        }
     }
 }

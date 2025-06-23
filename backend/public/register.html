@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Registration</title>
+    <style>
+        #message {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+    <script>
+        function toggleStudentFields() {
+            const roleSelect = document.getElementById('role');
+            const studentFields = document.getElementById('studentFields');
+            studentFields.style.display = roleSelect.value == '2' ? 'block' : 'none';
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = '';
+            messageDiv.className = '';
+
+            try {
+                const response = await fetch('http://localhost:8000/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    messageDiv.textContent = result.message || "Registration successful!";
+                    messageDiv.className = 'success';
+                    form.reset(); // Clear form
+                    toggleStudentFields(); // Reset student fields
+                } else {
+                    messageDiv.textContent = result.error || "Something went wrong.";
+                    messageDiv.className = 'error';
+                }
+            } catch (err) {
+                messageDiv.textContent = "Network error: " + err.message;
+                messageDiv.className = 'error';
+            }
+        }
+    </script>
+</head>
+<body>
+    <h2>Register</h2>
+    <form onsubmit="handleRegister(event)">
+        <label>Username: <input type="text" name="username" required></label><br>
+        <label>Full Name: <input type="text" name="full_name" required></label><br>
+        <label>Password: <input type="password" name="password" required></label><br>
+        
+        <label>Role:
+            <select name="role_name" id="role" onchange="toggleStudentFields()" required>
+                <option value="">-- Select Role --</option>
+                <option value="4">Admin</option>
+                <option value="3">Advisor</option>
+                <option value="1">Lecturer</option>
+                <option value="2">Student</option>
+            </select>
+        </label><br><br>
+
+        <div id="studentFields" style="display:none;">
+            <h4>Student Details</h4>
+            <label>Name: <input type="text" name="name"></label><br>
+            <label>Matric Number: <input type="text" name="matric_number"></label><br>
+            <label>Email: <input type="email" name="email"></label><br>
+            <label>Phone: <input type="text" name="phone"></label><br>
+            <label>Address: <input type="text" name="address"></label><br>
+        </div>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <div id="message"></div> 
+</body>
+</html>

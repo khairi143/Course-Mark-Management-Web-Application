@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+</head>
+<body>
+  <h2>User Login</h2>
+  <form id="loginForm" method="POST">
+    <input type="text" id="username" placeholder="Username" required><br><br>
+    <input type="password" id="password" placeholder="Password" required><br><br>
+    <button type="submit">Login</button>
+  </form>
+
+  <p id="loginResult"></p>
+
+  <script>
+  document.getElementById("loginForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("http://localhost:8000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          username: document.getElementById("username").value,
+          password: document.getElementById("password").value
+        })
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.token) {
+        localStorage.setItem("jwt_token", result.token);
+        alert("Login successful!");
+      } else {
+        alert(result.error || "Login failed!");
+      }
+    } catch (err) {
+      alert("Network error: " + err.message);
+    }
+  });
+</script>
+</body>
+</html>

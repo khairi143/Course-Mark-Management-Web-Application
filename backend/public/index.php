@@ -1,209 +1,125 @@
-<?php
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+    <?php
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization');
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+        http_response_code(200);
+        exit();
+    }
 
-require __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/../src/db.php';
-require __DIR__ . '/../src/jwtMiddleware.php';
+    require __DIR__ . '/../vendor/autoload.php';
 
+    use Slim\Factory\AppFactory;
+    use Psr\Http\Message\ServerRequestInterface as Request;
+    use Psr\Http\Message\ResponseInterface as Response;
+    use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
+    use Slim\Routing\RouteCollectorProxy;
 
-use Slim\Factory\AppFactory; 
-use Psr\Http\Message\ServerRequestInterface as Request;
-use Psr\Http\Message\ResponseInterface as Response;
-use Firebase\JWT\JWT;
+    use App\db;
+    use App\Middleware\JwtMiddleware;
+    use App\Controllers\AuthController;
+    use App\Controllers\StudentController;
+    use App\Services\StudentService;
 
-$secretKey = "my-secret-key";
+    $app = AppFactory::create();
+    $secretKey = "my-secret-key";
+    $unprotectedRoutes = ['/api/register', '/api/login'];
+    $jwtMiddleware = new JwtMiddleware($secretKey, $unprotectedRoutes);
+    $app->addRoutingMiddleware();
+    $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
-$app = AppFactory::create();
-$jwtMiddleware = new JwtMiddleware($secretKey);
+    // Register route
+    $app->post('/api/register', function (Request $request, Response $response) use ($secretKey) {
+    try {
+        $registrationData = json_decode($request->getBody()->getContents(), true);
 
-$app->add(function ($request, $handler) {
-    $response = $handler->handle($request);
-    return $response
-        ->withHeader('Access-Control-Allow-Origin', '*')
-        ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-});
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($registrationData)) {
+            $errorBody = json_encode(['error' => 'Invalid JSON data provided. Please ensure your request body is valid JSON.']);
+            $response->getBody()->write($errorBody);
+            return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+        }
 
-//publicly accessible route
-//login
-$app->post('/login', function (Request $request, Response $response) use ($secretKey) {
-    $data = json_decode($request->getBody()->getContents(), true);
+        $database = new db();
+        $studentService = new StudentService($database);
+        $authController = new AuthController($database, $studentService(), $secretKey);
 
-    $username = $data['username'] ?? '';
-    $password = $data['password'] ?? '';
+        $result = $authController->register($registrationData); // Delegate to AuthController
 
-    if (!$username || !$password) {
-        $response->getBody()->write(json_encode(['error' => 'Username and password required']));
+        $response->getBody()->write(json_encode($result));
+        return $response->withStatus(201)->withHeader('Content-Type', 'application/json');
+
+    } catch (\InvalidArgumentException $e) { // Use \ for global exceptions if not using use statement
+        $errorBody = json_encode(['error' => $e->getMessage()]);
+        $response->getBody()->write($errorBody);
         return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    } catch (\RuntimeException $e) { // Use \ for global exceptions
+        $statusCode = 500;
+        if ($e->getCode() === 409) {
+            $statusCode = 409;
+        }
+        $errorBody = json_encode(['error' => $e->getMessage()]);
+        $response->getBody()->write($errorBody);
+        return $response->withStatus($statusCode)->withHeader('Content-Type', 'application/json');
+    } catch (\Throwable $e) {
+        $errorBody = json_encode(['error' => 'An unexpected server error occurred: ' . $e->getMessage()]);
+        $response->getBody()->write($errorBody);
+        return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
     }
-
-    $pdo = getPDO();
-    $stmt = $pdo->prepare("SELECT * FROM USERS WHERE username = ?");
-    $stmt->execute([$username]);
-    $user = $stmt->fetch();
-
-    // if ($user && password_verify($password, $user['password'])) {
-    if ($user && $password === $user['password']) {
-
-        $issuedAt = time();
-        $expire = $issuedAt + 3600;
-
-        $payload = [
-            'user' => $user['username'],
-            'role' => $user['role'],
-            'iat' => $issuedAt,
-            'exp' => $expire
-        ];
-
-        $token = JWT::encode($payload, $secretKey, 'HS256');
-
-        $response->getBody()->write(json_encode(['token' => $token]));
-        return $response->withHeader('Content-Type', 'application/json');
-    }
-
-    $response->getBody()->write(json_encode(['error' => 'Invalid credentials']));
-    return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
 });
 
-$app->get('/me/role', function (Request $request, Response $response) {
-    $jwt = $request->getAttribute('jwt');
-    if (!$jwt) {
-        $response->getBody()->write(json_encode(['error' => 'Unauthorized']));
-        return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
-    }
-    $role = $jwt->role ?? null;
-    $response->getBody()->write(json_encode(['role' => $role]));
-    return $response->withHeader('Content-Type', 'application/json');
-})->add($jwtMiddleware);
 
-// // Lecturer CRUD routes
-// $app->group('/lecturers', function () use ($app) {
-//     // Get all lecturers
-//     $app->get('/getAll', \App\Controllers\LecturerController::class . ':getAll');
+    // Login route
+    $app->post('/api/login', function (Request $request, Response $response) use ($secretKey) {
+    try {
+        $credentials = json_decode($request->getBody()->getContents(), true);
 
-//     // Get a specific lecturer by ID
-//     $app->get('/get/{id}', \App\Controllers\LecturerController::class . ':getById');
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($credentials)) {
+            $errorBody = json_encode(['error' => 'Invalid JSON data provided for login.']);
+            $response->getBody()->write($errorBody);
+            return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+        }
 
-//     // Create a new lecturer
-//     $app->post('/create', \App\Controllers\LecturerController::class . ':create');
+        $database = new db();
+        $studentService = new StudentService($database);
+        $authController = new AuthController($database, $studentService(), $secretKey);
 
-//     // Update an existing lecturer
-//     $app->put('/update/{id}', \App\Controllers\LecturerController::class . ':update');
+        $result = $authController->login($credentials); // Delegate to AuthController
 
-//     // Delete a lecturer
-//     $app->delete('/delete/{id}', \App\Controllers\LecturerController::class . ':delete');
+        $response->getBody()->write(json_encode($result));
+        return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
 
-//     // Assessment Components CRUD routes
-//     $app->group('/assessment-components', function () use ($app) {
-//         // Get all assessment components for a course
-//         $app->get('/getAll', \App\Controllers\AssessmentComponentController::class . ':getAll');
-
-//         // Get a specific assessment component by ID
-//         $app->get('/get/{id}', \App\Controllers\AssessmentComponentController::class . ':getById');
-
-//         // Create a new assessment component
-//         $app->post('/create', \App\Controllers\AssessmentComponentController::class . ':create');
-
-//         // Update an existing assessment component
-//         $app->put('/update/{id}', \App\Controllers\AssessmentComponentController::class . ':update');
-
-//         // Delete an assessment component
-//         $app->delete('/delete/{id}', \App\Controllers\AssessmentComponentController::class . ':delete');
-//     });
-
-//     // Assessment Marks CRUD routes
-//     $app->group('/assessment-marks', function () use ($app) {
-//         // Get all marks for a student
-//         $app->get('/getAll', \App\Controllers\AssessmentMarkController::class . ':getAll');
-
-//         // Get specific mark for a student in an assessment component
-//         $app->get('/get/{id}', \App\Controllers\AssessmentMarkController::class . ':getById');
-
-//         // Create a mark for a student
-//         $app->post('/create', \App\Controllers\AssessmentMarkController::class . ':create');
-
-//         // Update an existing mark for a student
-//         $app->put('/update/{id}', \App\Controllers\AssessmentMarkController::class . ':update');
-
-//         // Delete a mark for a student
-//         $app->delete('/delete/{id}', \App\Controllers\AssessmentMarkController::class . ':delete');
-//     });
-
-// })->add($jwtMiddleware);
-
-// GET ALL /product – accessible to all registered users
-$app->get('/product', function ($request, $response) {
-    $pdo = getPDO();
-    $stmt = $pdo->query("SELECT * FROM PRODUCT");
-    $products = $stmt->fetchAll();
-
-    $response->getBody()->write(json_encode($products));
-    return $response->withHeader('Content-Type', 'application/json');
-})->add($jwtMiddleware);
-
-// Lecturers Modules CRUD routes:
-// GET ALL /students
-$app->get('/students', function ($request, $response) {
-    $pdo = getPDO();
-    $stmt = $pdo->query("SELECT * FROM STUDENTS");
-    $products = $stmt->fetchAll();
-
-    $response->getBody()->write(json_encode($products));
-    return $response->withHeader('Content-Type', 'application/json');
-})->add($jwtMiddleware);
-
-//GET 1 PRODUCT - accessible to all regs - normal user and admin
-$app->get('/product/{id}', function ($request, $response, $args) {
-    $id = $args['id'];
-
-    if (!is_numeric($id)) {
-        $response->getBody()->write(json_encode(['error' => 'Invalid product ID']));
+    } catch (\InvalidArgumentException $e) { // Use \ for global exceptions
+        $errorBody = json_encode(['error' => $e->getMessage()]);
+        $response->getBody()->write($errorBody);
         return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    } catch (\RuntimeException $e) { // Use \ for global exceptions
+        $statusCode = $e->getCode() ?: 500;
+        $errorBody = json_encode(['error' => $e->getMessage()]);
+        $response->getBody()->write($errorBody);
+        return $response->withStatus($statusCode)->withHeader('Content-Type', 'application/json');
+    } catch (\Throwable $e) {
+        $errorBody = json_encode(['error' => 'An unexpected server error occurred during login: ' . $e->getMessage()]);
+        $response->getBody()->write($errorBody);
+        return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
     }
-
-    $pdo = getPDO();
-    $stmt = $pdo->prepare("SELECT * FROM PRODUCT WHERE id = ?");
-    $stmt->execute([$id]);
-    $product = $stmt->fetch();
-
-    if (!$product) {
-        $response->getBody()->write(json_encode(['error' => 'Product not found']));
-        return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
-    }
-
-    $response->getBody()->write(json_encode($product));
-    return $response->withHeader('Content-Type', 'application/json');
-})->add($jwtMiddleware);
-
-// POST /product – for admin only
-$app->post('/product', function ($request, $response) use ($secretKey) {
-    $jwt = $request->getAttribute('jwt');
-
-    if (($jwt->role ?? '') !== 'admin') {
-        $error = ['error' => 'Access denied: admin only'];
-        $response->getBody()->write(json_encode($error));
-        return $response->withStatus(403)->withHeader('Content-Type', 'application/json');
-    }
-
-    $data = json_decode($request->getBody()->getContents(), true);
-
-    $pdo = getPDO();
-    $stmt = $pdo->prepare("INSERT INTO PRODUCT (name, price, image) VALUES (?, ?, ?)");
-    $stmt->execute([
-        $data['name'] ?? null,
-        $data['price'] ?? null,
-        $data['image'] ?? null
-    ]);
-
-    $response->getBody()->write(json_encode(['message' => 'Product added']));
-    return $response->withHeader('Content-Type', 'application/json');
-})->add(new JwtMiddleware($secretKey));
-
-// CORS preflight support
-$app->options('/{routes:.+}', function ($request, $response, $args) {
-    return $response;
 });
 
-$app->run();
+
+    $app->group('/api', function (RouteCollectorProxy $group) use ($secretKey) {
+        $group->get('/me/role', function (Request $request, Response $response) {
+            $jwt = $request->getAttribute('jwt');
+            $role = $jwt->data->role ?? null;
+            $response->getBody()->write(json_encode(['role' => $role]));
+            return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
+        });
+    });
+
+    $app->add(function (Request $request, RequestHandler $handler): Response {
+        $response = $handler->handle($request);
+        return $response
+            ->withHeader('Access-Control-Allow-Origin', '*')
+            ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+            ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    });
+
+    $app->run();
