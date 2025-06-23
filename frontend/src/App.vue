@@ -13,7 +13,6 @@
 
     <NavBar :menus="menus[selectedRole]" />
 
-    <DashBoard></DashBoard>
     <router-view />
   </div>
 </template>
@@ -21,10 +20,9 @@
 <script>
 import NavBar from './components/NavBar.vue'
 import ProfileSidebar from './components/ProfileSidebar.vue'
-// import DashBoard from './components/DashBoard.vue'
 
 export default {
-  components: { NavBar, ProfileSidebar},
+  components: { NavBar, ProfileSidebar },
   data() {
     return {
       selectedRole: 'personbmi',

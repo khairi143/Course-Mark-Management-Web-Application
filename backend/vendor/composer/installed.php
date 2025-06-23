@@ -3,7 +3,7 @@
         'name' => 'user/bmiapp-api',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'b81cdd3fd12479fe9dc81130a191d7d57b237d94',
+        'reference' => '8373e488c99726861004be20d9c5af6aeadb31a3',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -142,7 +142,7 @@
         'user/bmiapp-api' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'b81cdd3fd12479fe9dc81130a191d7d57b237d94',
+            'reference' => '8373e488c99726861004be20d9c5af6aeadb31a3',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

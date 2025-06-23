@@ -55,6 +55,7 @@ export default {
     },
     logout() {
       alert('Logging out...');
+      
     }
   }
 }

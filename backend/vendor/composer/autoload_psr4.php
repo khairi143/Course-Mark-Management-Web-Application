@@ -16,5 +16,5 @@ return array(
     'Firebase\\JWT\\' => array($vendorDir . '/firebase/php-jwt/src'),
     'Fig\\Http\\Message\\' => array($vendorDir . '/fig/http-message-util/src'),
     'FastRoute\\' => array($vendorDir . '/nikic/fast-route/src'),
-    'App\\' => array($baseDir . '/src'),
+    'App\\' => array($baseDir . '/src/App'),
 );

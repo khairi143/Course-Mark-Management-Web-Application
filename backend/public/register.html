@@ -2,90 +2,110 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>User Registration</title>
-    <style>
-        #message {
-            margin-top: 15px;
-            font-weight: bold;
-        }
-        .success {
-            color: green;
-        }
-        .error {
-            color: red;
-        }
-    </style>
-    <script>
-        function toggleStudentFields() {
-            const roleSelect = document.getElementById('role');
-            const studentFields = document.getElementById('studentFields');
-            studentFields.style.display = roleSelect.value == '2' ? 'block' : 'none';
-        }
-
-        async function handleRegister(event) {
-            event.preventDefault();
-            const form = event.target;
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-
-            const messageDiv = document.getElementById('message');
-            messageDiv.textContent = '';
-            messageDiv.className = '';
-
-            try {
-                const response = await fetch('http://localhost:8000/api/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    messageDiv.textContent = result.message || "Registration successful!";
-                    messageDiv.className = 'success';
-                    form.reset(); // Clear form
-                    toggleStudentFields(); // Reset student fields
-                } else {
-                    messageDiv.textContent = result.error || "Something went wrong.";
-                    messageDiv.className = 'error';
-                }
-            } catch (err) {
-                messageDiv.textContent = "Network error: " + err.message;
-                messageDiv.className = 'error';
-            }
-        }
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
 </head>
 <body>
-    <h2>Register</h2>
-    <form onsubmit="handleRegister(event)">
-        <label>Username: <input type="text" name="username" required></label><br>
-        <label>Full Name: <input type="text" name="full_name" required></label><br>
-        <label>Password: <input type="password" name="password" required></label><br>
+    <h1>Register</h1>
+
+    <div id="message" style="color: red; margin-bottom: 10px;"></div> <!-- For displaying messages -->
+
+    <form id="registerForm">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br><br>
+
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+
+        <label for="role">Role:</label><br>
+      
+        <input type="text" id="role" name="role" value="student" required placeholder="e.g., student, lecturer"><br><br>
+
+   
+        <h2>Student Details (if registering as student)</h2>
+        <label for="matric_number">Matric No:</label><br>
+        <input type="text" id="matric_number" name="matric_number" required><br><br>
+
+        <label for="name">Student Name:</label><br>
+        <input type="text" id="name" name="name" required><br><br>
+
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
         
-        <label>Role:
-            <select name="role_name" id="role" onchange="toggleStudentFields()" required>
-                <option value="">-- Select Role --</option>
-                <option value="4">Admin</option>
-                <option value="3">Advisor</option>
-                <option value="1">Lecturer</option>
-                <option value="2">Student</option>
-            </select>
-        </label><br><br>
-
-        <div id="studentFields" style="display:none;">
-            <h4>Student Details</h4>
-            <label>Name: <input type="text" name="name"></label><br>
-            <label>Matric Number: <input type="text" name="matric_number"></label><br>
-            <label>Email: <input type="email" name="email"></label><br>
-            <label>Phone: <input type="text" name="phone"></label><br>
-            <label>Address: <input type="text" name="address"></label><br>
-        </div>
-
         <button type="submit">Register</button>
     </form>
 
-    <div id="message"></div> 
+    <script>
+        // Get references to the form and message display area
+        const registerForm = document.getElementById('registerForm');
+        const messageDiv = document.getElementById('message');
+
+        // Function to display messages
+        function displayMessage(msg, isError = false) {
+            messageDiv.textContent = msg;
+            messageDiv.style.color = isError ? 'red' : 'green';
+        }
+
+        // Add an event listener for the form submission
+        registerForm.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent the default form submission (which reloads the page)
+
+            // Get values from the input fields
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            const matric_number = document.getElementById('matric_number').value;
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+           
+
+            // Construct the data payload for the API
+            const registrationData = {
+                username: username,
+                password: password,
+                role: role,
+                // Include all required student-specific fields
+                matric_number: matric_number,
+                name: name,
+                email: email,
+            };
+
+            // Define your backend API endpoint URL
+            // IMPORTANT: Adjust this URL if your backend is running on a different domain or port
+            const API_ENDPOINT = 'http://localhost:8080/api/register';
+
+            try {
+                // Send the POST request to your backend API
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json' // Tell the server we are sending JSON
+                    },
+                    body: JSON.stringify(registrationData) // Convert JavaScript object to JSON string
+                });
+
+                // Check if the response was successful (status code 2xx)
+                if (response.ok) {
+                    const result = await response.json();
+                    displayMessage(`Registration successful! ${result.message || ''} Username: ${result.username}`, false);
+                    console.log('Registration Success:', result);
+
+                    // Optional: Redirect to login page after successful registration
+                    // setTimeout(() => {
+                    //     window.location.href = 'login.html';
+                    // }, 2000); // Redirect after 2 seconds
+                } else {
+                    // If the response was an error (e.g., 400, 409, 500)
+                    const errorResult = await response.json(); // Parse the error JSON from backend
+                    displayMessage(`Registration failed: ${errorResult.error || 'Unknown error'}`, true);
+                    console.error('Registration Error:', errorResult);
+                }
+            } catch (error) {
+                // Handle network errors (e.g., server not running, CORS issues)
+                displayMessage('Network error. Could not connect to the server. Check console for details.', true);
+                console.error('Fetch Error:', error);
+            }
+        });
+    </script>
 </body>
 </html>

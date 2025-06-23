@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+</head>
+<body>
+    <h1>This is the student dashboard for student: <span id="usernameDisplay"></span></h1>
+    <p>Student ID: <span id="studentIdDisplay">Loading...</span></p>
+    <p>Matric No: <span id="matricNoDisplay">Loading...</span></p>
+
+    <button id="logoutButton" style="margin-top: 20px; padding: 10px 15px; cursor: pointer;">Logout</button>
+
+    <script>
+        // Get elements where data will be displayed
+        const usernameDisplay = document.getElementById('usernameDisplay');
+        const studentIdDisplay = document.getElementById('studentIdDisplay');
+        const matricNoDisplay = document.getElementById('matricNoDisplay');
+        const logoutButton = document.getElementById('logoutButton'); // Get logout button
+
+        // Function to redirect to login page (and clear local storage)
+        function redirectToLogin() {
+            localStorage.removeItem('jwt_token');
+            localStorage.removeItem('user_info');
+            window.location.href = 'login.html';
+        }
+
+        async function fetchStudentData() {
+            // 1. Retrieve authentication token and basic user info from localStorage
+            const token = localStorage.getItem('jwt_token');
+            const userInfoString = localStorage.getItem('user_info');
+
+            if (!token || !userInfoString) {
+                console.warn("Authentication token or user info missing. Redirecting to login.");
+                redirectToLogin();
+                return; // Stop execution
+            }
+
+            let userInfo;
+            try {
+                userInfo = JSON.parse(userInfoString);
+                // Ensure userInfo is valid and the user is indeed a student
+                // The 'id' is crucial for fetching student-specific data from the API
+                if (!userInfo || !userInfo.id || !userInfo.username || userInfo.role !== 'student') {
+                    console.error("Malformed user info or user is not a student. Redirecting to login.");
+                    redirectToLogin();
+                    return;
+                }
+            } catch (e) {
+                console.error("Error parsing user info from localStorage:", e);
+                redirectToLogin();
+                return;
+            }
+
+            // Display username immediately from localStorage for quick feedback
+            usernameDisplay.textContent = userInfo.username;
+
+            // 2. Define the API endpoint for fetching the specific student's data
+            // We use the 'id' from userInfo (obtained from the JWT payload during login)
+            // to fetch the details for the currently logged-in student.
+            const API_ENDPOINT = "http://localhost:8000/api/students/" + userInfo.id; // Ensure this URL matches your backend
+
+            try {
+                // 3. Make the API request, including the JWT for authentication
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`, // Send the JWT for authentication
+                        'Content-Type': 'application/json' // Indicate expected response type (optional for GET)
+                    }
+                });
+
+                // 4. Handle the API response
+                if (response.ok) {
+                    const studentData = await response.json(); // Parse the JSON response body
+
+                    // Update the dashboard with fetched data
+                    // Assuming your /api/students/{id} returns an object with student_id, matric_no, etc.
+                    studentIdDisplay.textContent = studentData.student_id || 'N/A'; // Display student_id from API
+                    matricNoDisplay.textContent = studentData.matric_no || 'N/A'; // Display matric_no from API
+
+                } else if (response.status === 401) {
+                    // Token expired or invalid
+                    console.error("Unauthorized: Invalid or expired token. Redirecting to login.");
+                    redirectToLogin();
+                } else if (response.status === 404) {
+                    // Student data not found (e.g., user exists but no student profile linked, or ID mismatch)
+                    console.error("Student data not found for this user.");
+                    studentIdDisplay.textContent = 'Not found';
+                    matricNoDisplay.textContent = 'Not found';
+                } else {
+                    // Other API errors (e.g., 500 Internal Server Error)
+                    const errorResult = await response.json(); // Attempt to parse error message from backend
+                    console.error(`API Error: ${response.status} - ${errorResult.error || 'Unknown error'}`);
+                    studentIdDisplay.textContent = 'Error fetching data';
+                    matricNoDisplay.textContent = 'Error fetching data';
+                }
+            } catch (error) {
+                // Handle network errors (e.g., server down, CORS issues)
+                console.error("Network or Fetch Error:", error);
+                usernameDisplay.textContent = 'Error'; // Clear if network error affects initial display
+                studentIdDisplay.textContent = 'Network error';
+                matricNoDisplay.textContent = 'Network error';
+            }
+        }
+
+        // --- Logout Logic ---
+        logoutButton.addEventListener('click', async () => {
+            // Optional: Call a backend logout endpoint if you want to log the event or implement blacklisting
+            const API_LOGOUT_ENDPOINT = 'http://localhost:8000/api/logout';
+            const token = localStorage.getItem('jwt_token');
+
+            if (token) {
+                try {
+                    const response = await fetch(API_LOGOUT_ENDPOINT, {
+                        method: 'POST', // Or GET if your backend handles it that way, but POST is preferred for actions
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        console.warn("Backend logout request failed, but clearing client-side data anyway.", await response.json());
+                    }
+                } catch (error) {
+                    console.error("Network error during backend logout call:", error);
+                }
+            }
+
+            // Always clear client-side storage and redirect, regardless of backend logout success
+            redirectToLogin();
+        });
+
+        // Call the function to fetch student data when the page loads
+        document.addEventListener('DOMContentLoaded', fetchStudentData);
+    </script>
+</body>
+</html>

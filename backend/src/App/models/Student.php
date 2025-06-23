@@ -1,13 +1,15 @@
-<!-- src/models/Student.php -->
+
 <?php
 
 namespace App\Models;
 
 class Student {
-    private $student_id;
-    private $matric_no;
-    private $student_name;
+    private $user_id; 
+    private $name;
+    private $matric_number;
     private $email;
+    private $phone;
+    private $address;
     private $status;
 
     // Define getter and setter methods

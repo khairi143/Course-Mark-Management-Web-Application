@@ -1,46 +1,92 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
 </head>
 <body>
-  <h2>User Login</h2>
-  <form id="loginForm" method="POST">
-    <input type="text" id="username" placeholder="Username" required><br><br>
-    <input type="password" id="password" placeholder="Password" required><br><br>
-    <button type="submit">Login</button>
-  </form>
+    <h1>Login</h1>
 
-  <p id="loginResult"></p>
+    <div id="message" style="color: red; margin-bottom: 10px;"></div>
 
-  <script>
-  document.getElementById("loginForm").addEventListener("submit", async function(e) {
-    e.preventDefault();
+    <form id="loginForm">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br><br>
 
-    try {
-      const response = await fetch("http://localhost:8000/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          username: document.getElementById("username").value,
-          password: document.getElementById("password").value
-        })
-      });
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
 
-      const result = await response.json();
+        <button type="submit">Login</button>
+    </form>
 
-      if (response.ok && result.token) {
-        localStorage.setItem("jwt_token", result.token);
-        alert("Login successful!");
-      } else {
-        alert(result.error || "Login failed!");
-      }
-    } catch (err) {
-      alert("Network error: " + err.message);
-    }
-  });
-</script>
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const messageDiv = document.getElementById('message');
+
+        function displayMessage(msg, isError = false) {
+            messageDiv.textContent = msg;
+            messageDiv.style.color = isError ? 'red' : 'green';
+        }
+
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const credentials = {
+                username: username,
+                password: password
+            };
+
+            const API_ENDPOINT = 'http://localhost:8080/api/login'; // Your backend login endpoint
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(credentials)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    const token = result.token;
+                    const user = result.user; // Contains id, username, role
+
+                    // Store the JWT securely (e.g., in localStorage)
+                    // IMPORTANT: localStorage is convenient but NOT truly secure for sensitive tokens
+                    // For production, consider HttpOnly cookies or more advanced methods.
+                    localStorage.setItem('jwt_token', token);
+                    localStorage.setItem('user_info', JSON.stringify(user));
+
+                    displayMessage(`Login successful! Welcome, ${user.username}. Role: ${user.role}`, false);
+                    console.log('Login Success:', result);
+
+                    // Redirect to the student dashboard if the role is student
+                    if (user.role === 'student') {
+                        setTimeout(() => {
+                            window.location.href = 'student_dashboard.html';
+                        }, 1000);
+                    } else {
+                        // Handle other roles or general dashboard
+                        // setTimeout(() => {
+                        //     window.location.href = 'dashboard.html';
+                        // }, 1000);
+                    }
+
+                } else {
+                    const errorResult = await response.json();
+                    displayMessage(`Login failed: ${errorResult.error || 'Unknown error'}`, true);
+                    console.error('Login Error:', errorResult);
+                }
+            } catch (error) {
+                displayMessage('Network error. Could not connect to the server. Check console for details.', true);
+                console.error('Fetch Error:', error);
+            }
+        });
+    </script>
 </body>
 </html>
