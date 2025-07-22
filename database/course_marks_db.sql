@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 25, 2025 at 01:46 AM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Generation Time: Jul 22, 2025 at 09:37 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -39,7 +39,8 @@ CREATE TABLE `advisors` (
 
 INSERT INTO `advisors` (`id`, `user_id`, `advisor_full_name`) VALUES
 (3, 24, 'Dr Siti Zaiton'),
-(5, 28, 'Dr Wan');
+(5, 28, 'Dr Wan'),
+(6, 31, 'Ahmad Ashraf');
 
 -- --------------------------------------------------------
 
@@ -100,7 +101,15 @@ INSERT INTO `assessments` (`id`, `section_id`, `assessment_name`, `max_marks`, `
 (20, 13, 'Assignment 2', 100, 20.00),
 (21, 13, 'Project', 100, 20.00),
 (22, 13, 'Final Exam', 100, 30.00),
-(23, 13, 'Quiz 1', 15, 5.00);
+(23, 13, 'Quiz 1', 15, 5.00),
+(24, 18, 'Assignment 2', 10, 25.00),
+(25, 18, 'Quiz 1', 10, 5.00),
+(26, 19, 'Assignment 1', 30, 15.00),
+(27, 19, 'In Class Exersice 1', 5, 2.00),
+(28, 19, 'In Class Exersice 2', 10, 4.50),
+(29, 19, 'Quiz 1', 5, 2.50),
+(39, 19, 'Mid Term Test', 100, 20.00),
+(40, 19, 'Final Test ', 100, 30.00);
 
 -- --------------------------------------------------------
 
@@ -123,7 +132,10 @@ INSERT INTO `courses` (`id`, `course_code`, `course_name`, `department`) VALUES
 (2, 'CS102', 'Intro to CS', 'Computer Science'),
 (4, 'CS103', 'Intro to OOP', 'Computer Science'),
 (5, 'CS104', 'Data Structure & Algorithm', 'Computer Science'),
-(6, 'CS105', 'Discrete Structure', 'Computer Science');
+(6, 'CS105', 'Discrete Structure', 'Computer Science'),
+(7, 'CS106', 'Software Quality Assurance', 'Software Engineering'),
+(8, 'CS107', 'Mobile Application Programming', 'Software Engineering'),
+(9, 'CS108', 'Computer Ingtelligence', 'Software Engineering');
 
 -- --------------------------------------------------------
 
@@ -160,7 +172,20 @@ INSERT INTO `enrollments` (`id`, `student_id`, `section_id`, `enrollment_date`, 
 (19, 7, 13, '2025-06-24 20:14:40', 77.60),
 (20, 6, 13, '2025-06-24 20:14:43', 87.13),
 (21, 4, 13, '2025-06-24 20:14:46', 78.80),
-(22, 2, 13, '2025-06-24 20:14:50', 86.30);
+(22, 2, 13, '2025-06-24 20:14:50', 86.30),
+(23, 9, 18, '2025-07-19 14:46:40', 30.00),
+(27, 9, 20, '2025-07-19 14:47:10', NULL),
+(29, 11, 18, '2025-07-21 08:36:49', NULL),
+(30, 10, 18, '2025-07-21 08:36:53', NULL),
+(31, 12, 19, '2025-07-21 08:37:16', 84.85),
+(32, 11, 19, '2025-07-21 08:37:19', NULL),
+(35, 12, 20, '2025-07-21 08:37:39', NULL),
+(36, 11, 20, '2025-07-21 08:37:55', NULL),
+(37, 10, 20, '2025-07-21 08:37:59', NULL),
+(38, 9, 19, '2025-07-21 08:41:09', NULL),
+(42, 2, 19, '2025-07-21 09:19:50', NULL),
+(46, 10, 19, '2025-07-21 11:42:01', 69.00),
+(47, 12, 18, '2025-07-21 11:42:35', NULL);
 
 -- --------------------------------------------------------
 
@@ -181,7 +206,8 @@ CREATE TABLE `lecturers` (
 INSERT INTO `lecturers` (`id`, `user_id`, `department`) VALUES
 (1, 3, 'Computer Science'),
 (4, 14, 'Computer Science'),
-(6, 26, 'Computer Science');
+(6, 26, 'Computer Science'),
+(7, 30, 'Software Engineering');
 
 -- --------------------------------------------------------
 
@@ -216,7 +242,39 @@ INSERT INTO `logs` (`id`, `user_id`, `action`, `timestamp`, `reviewed`) VALUES
 (12, 3, 'login', '2025-06-25 04:13:58', 0),
 (13, 10, 'login', '2025-06-25 04:20:38', 0),
 (14, 24, 'login', '2025-06-25 04:22:51', 0),
-(15, 3, 'login', '2025-06-25 04:27:19', 0);
+(15, 3, 'login', '2025-06-25 04:27:19', 0),
+(16, 10, 'login', '2025-07-07 20:44:55', 0),
+(17, 1, 'login', '2025-07-13 11:47:27', 0),
+(18, 10, 'login', '2025-07-13 11:48:26', 0),
+(19, 1, 'login', '2025-07-13 11:49:16', 0),
+(20, 29, 'login', '2025-07-13 11:50:43', 0),
+(21, 29, 'login', '2025-07-19 22:31:38', 0),
+(22, 1, 'login', '2025-07-19 22:31:49', 0),
+(23, 30, 'login', '2025-07-19 22:34:50', 0),
+(24, 29, 'login', '2025-07-19 22:36:16', 0),
+(25, 10, 'login', '2025-07-19 22:38:11', 0),
+(26, 31, 'login', '2025-07-19 22:39:14', 0),
+(27, 1, 'login', '2025-07-19 22:41:16', 0),
+(28, 30, 'login', '2025-07-19 22:46:28', 0),
+(29, 1, 'login', '2025-07-19 22:53:16', 0),
+(30, 30, 'login', '2025-07-21 16:33:13', 0),
+(31, 1, 'login', '2025-07-21 16:33:30', 0),
+(32, 31, 'login', '2025-07-21 16:35:57', 0),
+(33, 30, 'login', '2025-07-21 16:36:33', 0),
+(34, 30, 'login', '2025-07-21 16:40:00', 0),
+(35, 33, 'login', '2025-07-21 17:05:00', 0),
+(36, 29, 'login', '2025-07-21 17:05:58', 0),
+(37, 33, 'login', '2025-07-21 17:06:26', 0),
+(38, 30, 'login', '2025-07-21 17:06:42', 0),
+(39, 30, 'login', '2025-07-21 17:13:18', 0),
+(40, 30, 'login', '2025-07-21 17:14:22', 0),
+(41, 30, 'login', '2025-07-21 17:15:37', 0),
+(42, 30, 'login', '2025-07-21 17:18:21', 0),
+(43, 30, 'login', '2025-07-21 17:22:01', 0),
+(44, 30, 'login', '2025-07-21 17:28:33', 0),
+(45, 30, 'login', '2025-07-21 19:41:27', 0),
+(46, 32, 'login', '2025-07-22 10:16:18', 0),
+(47, 30, 'login', '2025-07-22 10:18:39', 0);
 
 -- --------------------------------------------------------
 
@@ -301,7 +359,26 @@ INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `type`, `relat
 (63, 12, 'Assessment Mark Updated', 'Your mark for assessment \'Assignment 2\' has been updated. Please check your results.', 'mark_update', 20, 13, 0, '2025-06-24 20:20:03', NULL),
 (64, 12, 'Assessment Mark Updated', 'Your mark for assessment \'Project\' has been updated. Please check your results.', 'mark_update', 21, 13, 0, '2025-06-24 20:20:03', NULL),
 (65, 12, 'Assessment Mark Updated', 'Your mark for assessment \'Final Exam\' has been updated. Please check your results.', 'mark_update', 22, 13, 0, '2025-06-24 20:20:03', NULL),
-(66, 12, 'Assessment Mark Updated', 'Your mark for assessment \'Quiz 1\' has been updated. Please check your results.', 'mark_update', 23, 13, 0, '2025-06-24 20:20:03', NULL);
+(66, 12, 'Assessment Mark Updated', 'Your mark for assessment \'Quiz 1\' has been updated. Please check your results.', 'mark_update', 23, 13, 0, '2025-06-24 20:20:03', NULL),
+(67, 29, 'Assessment Mark Updated', 'Your mark for assessment \'Assignment 2\' has been updated. Please check your results.', 'mark_update', 24, 18, 0, '2025-07-19 14:49:00', NULL),
+(68, 29, 'Assessment Mark Updated', 'Your mark for assessment \'Quiz 1\' has been updated. Please check your results.', 'mark_update', 25, 18, 0, '2025-07-19 14:49:00', NULL),
+(69, 34, 'Assessment Mark Updated', 'Your mark for assessment \'Assignment 1\' has been updated. Please check your results.', 'mark_update', 26, 19, 0, '2025-07-21 09:35:48', NULL),
+(70, 34, 'Assessment Mark Updated', 'Your mark for assessment \'In Class Exersice 1\' has been updated. Please check your results.', 'mark_update', 27, 19, 0, '2025-07-21 09:35:48', NULL),
+(71, 34, 'Assessment Mark Updated', 'Your mark for assessment \'In Class Exersice 2\' has been updated. Please check your results.', 'mark_update', 28, 19, 0, '2025-07-21 09:35:48', NULL),
+(72, 34, 'Assessment Mark Updated', 'Your mark for assessment \'Quiz 1\' has been updated. Please check your results.', 'mark_update', 29, 19, 0, '2025-07-21 09:35:48', NULL),
+(73, 34, 'Assessment Mark Updated', 'Your mark for assessment \'Mid Term Test \' has been updated. Please check your results.', 'mark_update', NULL, 19, 0, '2025-07-21 09:35:48', NULL),
+(74, 34, 'Assessment Mark Updated', 'Your mark for assessment \'Final Test \' has been updated. Please check your results.', 'mark_update', NULL, 19, 0, '2025-07-21 09:35:48', NULL),
+(75, 34, 'Assessment Mark Updated', 'Your mark for assessment \'Project Individual \' has been updated. Please check your results.', 'mark_update', NULL, 19, 0, '2025-07-21 09:35:48', NULL),
+(76, 32, 'Assessment Mark Updated', 'Your mark for assessment \'Assignment 1\' has been updated. Please check your results.', 'mark_update', 26, 19, 0, '2025-07-21 11:45:37', NULL),
+(77, 32, 'Assessment Mark Updated', 'Your mark for assessment \'In Class Exersice 1\' has been updated. Please check your results.', 'mark_update', 27, 19, 0, '2025-07-21 11:45:37', NULL),
+(78, 32, 'Assessment Mark Updated', 'Your mark for assessment \'In Class Exersice 2\' has been updated. Please check your results.', 'mark_update', 28, 19, 0, '2025-07-21 11:45:37', NULL),
+(79, 32, 'Assessment Mark Updated', 'Your mark for assessment \'Quiz 1\' has been updated. Please check your results.', 'mark_update', 29, 19, 0, '2025-07-21 11:45:37', NULL),
+(80, 32, 'Assessment Mark Updated', 'Your mark for assessment \'Mid Term Test\' has been updated. Please check your results.', 'mark_update', 39, 19, 0, '2025-07-21 11:45:37', NULL),
+(81, 32, 'Assessment Mark Updated', 'Your mark for assessment \'Final Test \' has been updated. Please check your results.', 'mark_update', 40, 19, 0, '2025-07-21 11:45:37', NULL),
+(82, 32, 'Assessment Mark Updated', 'Your mark for assessment \'Assignment 1\' has been updated. Please check your results.', 'mark_update', 26, 19, 0, '2025-07-21 11:46:10', NULL),
+(83, 32, 'Assessment Mark Updated', 'Your mark for assessment \'Quiz 1\' has been updated. Please check your results.', 'mark_update', 29, 19, 0, '2025-07-21 11:46:10', NULL),
+(84, 32, 'Assessment Mark Updated', 'Your mark for assessment \'Mid Term Test\' has been updated. Please check your results.', 'mark_update', 39, 19, 0, '2025-07-21 11:46:10', NULL),
+(85, 32, 'Assessment Mark Updated', 'Your mark for assessment \'Final Test \' has been updated. Please check your results.', 'mark_update', 40, 19, 0, '2025-07-21 11:46:10', NULL);
 
 -- --------------------------------------------------------
 
@@ -375,7 +452,10 @@ INSERT INTO `sections` (`id`, `course_id`, `section_name`, `lecturer_id`, `max_c
 (11, 4, '02', 6, 30),
 (12, 4, '03', 1, 30),
 (13, 6, '01', 1, 30),
-(14, 6, '02', 6, 30);
+(14, 6, '02', 6, 30),
+(18, 7, '01', 7, 30),
+(19, 8, '01', 7, 30),
+(20, 9, '01', 7, 30);
 
 -- --------------------------------------------------------
 
@@ -403,7 +483,11 @@ INSERT INTO `students` (`id`, `user_id`, `name`, `matric_number`, `email`, `phon
 (4, 12, 'TAM JIA HAO', 'A22EC0106', 'pzhiyingyt@gmail.com', '0187888263', '19, Jalan Bestari 5/1 ', 3),
 (6, 19, 'TAN YOU CHUN', 'A22EC0108', 'pzhiyin3@gmail.com', '0182344231', 'address', 5),
 (7, 23, 'KUAN JI TONG', 'A22EC0066', 'pzhiy@gmail.com', '0123222321', 'address', 5),
-(8, 25, 'OH KAI XUAN', 'A22EC0102', 'okx@gmail.com', '0187888263', 'address', 3);
+(8, 25, 'OH KAI XUAN', 'A22EC0102', 'okx@gmail.com', '0187888263', 'address', 3),
+(9, 29, 'AHMAD FAIZ BIN ALLAUDDIN', 'A22EC0132', 'faiz03@graduate.utm.my', '0148376477', 'No 14 JALAN P 14 C 1/5 PRESINT 14', 5),
+(10, 32, 'Shahir', 'A22EC0088', 'shahir03@graduate.utm.my', '014447844', 'Jalan Iman, 81310 Skudai, Johor Darul Ta\'zim', 6),
+(11, 33, 'Muhammad Hafiz Khairul Kamal', 'A22EC0212', 'hafiz03@graduate.utm.my', '0144874467', 'Jalan Iman, 81310 Skudai, Johor Darul Ta\'zim', 6),
+(12, 34, 'NUR HANISAH IZZATI', 'A22EC0097', 'nur03@graduate.utm.my', '014847647', 'Jalan Iman, 81310 Skudai, Johor Darul Ta\'zim', 6);
 
 -- --------------------------------------------------------
 
@@ -483,7 +567,19 @@ INSERT INTO `student_assessment_marks` (`id`, `student_id`, `assessment_id`, `ma
 (63, 4, 20, 67.00, '2025-06-24 20:20:03'),
 (64, 4, 21, 76.00, '2025-06-24 20:20:03'),
 (65, 4, 22, 76.00, '2025-06-24 20:20:03'),
-(66, 4, 23, 15.00, '2025-06-24 20:20:03');
+(66, 4, 23, 15.00, '2025-06-24 20:20:03'),
+(67, 9, 24, 10.00, '2025-07-19 14:49:00'),
+(68, 9, 25, 10.00, '2025-07-19 14:49:00'),
+(69, 12, 26, 26.00, '2025-07-21 09:35:48'),
+(70, 12, 27, 5.00, '2025-07-21 09:35:48'),
+(71, 12, 28, 8.50, '2025-07-21 09:35:48'),
+(72, 12, 29, 5.00, '2025-07-21 09:35:48'),
+(76, 10, 26, 30.00, '2025-07-21 11:45:37'),
+(77, 10, 27, 5.00, '2025-07-21 11:45:37'),
+(78, 10, 28, 10.00, '2025-07-21 11:45:37'),
+(79, 10, 29, 5.00, '2025-07-21 11:45:37'),
+(80, 10, 39, 90.00, '2025-07-21 11:45:37'),
+(81, 10, 40, 90.00, '2025-07-21 11:45:37');
 
 -- --------------------------------------------------------
 
@@ -516,7 +612,13 @@ INSERT INTO `users` (`id`, `username`, `full_name`, `password`, `role_id`, `crea
 (24, 'drsitizaiton', 'Dr Siti Zaiton', '$2y$10$ClEUzvZDr96OSPr5ru5iBevVIWIjhR9IWHGmnGGx/YofqD0mFI42a', 3, '2025-06-24 18:14:55', '2025-06-24 18:14:55'),
 (25, 'A22EC0102', 'OH KAI XUAN', '$2y$10$h3x5bMjprjh73i25aii9Cu4VFW/Vt4FpeLJgr2poOl4aSu009CkMG', 2, '2025-06-24 18:22:02', '2025-06-24 18:22:02'),
 (26, 'drsim', 'Sim Hiew Moi', '$2y$10$zfV/r8gCc6wPIf5LnjkaoO6/9xHgSaH1Y2ZORyg11e7kkXEa7/qgm', 1, '2025-06-24 18:49:25', '2025-06-24 20:13:44'),
-(28, 'wannsiradvisor', 'Dr Wan', '$2y$10$ygXlRvVsIhtxBIzGyg0tf.PifQEO/sBrN4mnF2K78IuECUeLljqkC', 3, '2025-06-24 19:43:45', '2025-06-24 19:43:45');
+(28, 'wannsiradvisor', 'Dr Wan', '$2y$10$ygXlRvVsIhtxBIzGyg0tf.PifQEO/sBrN4mnF2K78IuECUeLljqkC', 3, '2025-06-24 19:43:45', '2025-06-24 19:43:45'),
+(29, 'A22EC0132', 'AHMAD FAIZ BIN ALLAUDDIN', '$2y$10$rHvPp/MlA6A3H1i0fQV0TuWErkqDAvMhYYQzx71JgXYpEkRUPtX8a', 2, '2025-07-13 03:50:23', '2025-07-13 03:50:23'),
+(30, 'Faiz', 'Lecturer Faiz', '$2y$10$ehclb6JacdVP/naSkMeCg.jwt9KlOS/DbGejmvp39tZi4y/Lgm/gS', 1, '2025-07-19 14:32:35', '2025-07-19 14:40:53'),
+(31, 'Ashraf', 'Ahmad Ashraf', '$2y$10$HvJ3KQ/1x.qiJB1sp.zCt.SeMkRfwrahIeR7eMG5kg94XUo3L3S76', 3, '2025-07-19 14:38:54', '2025-07-19 14:38:54'),
+(32, 'A22EC0088', 'Shahir', '$2y$10$opyHKDRVEol75vEJazV8POHJhAX1C5AMbTtYF32tk5wOwGhBEVrk.', 2, '2025-07-21 08:34:21', '2025-07-21 08:34:21'),
+(33, 'A22EC0212', 'Muhammad Hafiz Khairul Kamal', '$2y$10$AT0fAe2zdfpTBbh66tPgKuSDFe7Nf/clIY.Ln1m1EbZx.cm6Qs1qC', 2, '2025-07-21 08:35:14', '2025-07-21 08:35:14'),
+(34, 'A22EC0097', 'NUR HANISAH IZZATI', '$2y$10$Xb3Cf5h5tnvbCTw48nKM3u/FhzMPa1Zpmk/1GNxCyBZUuPGB2u5jS', 2, '2025-07-21 08:35:48', '2025-07-21 08:35:48');
 
 --
 -- Indexes for dumped tables
@@ -639,7 +741,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `advisors`
 --
 ALTER TABLE `advisors`
-  MODIFY `id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `advisor_notes`
@@ -651,37 +753,37 @@ ALTER TABLE `advisor_notes`
 -- AUTO_INCREMENT for table `assessments`
 --
 ALTER TABLE `assessments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `enrollments`
 --
 ALTER TABLE `enrollments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
 -- AUTO_INCREMENT for table `lecturers`
 --
 ALTER TABLE `lecturers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `logs`
 --
 ALTER TABLE `logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
 
 --
 -- AUTO_INCREMENT for table `remark_requests`
@@ -699,25 +801,25 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT for table `sections`
 --
 ALTER TABLE `sections`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `student_assessment_marks`
 --
 ALTER TABLE `student_assessment_marks`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- Constraints for dumped tables
